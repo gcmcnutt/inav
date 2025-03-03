@@ -256,6 +256,7 @@
 #define MSP_SENSOR_ALIGNMENT     126    //out message         orientation of acc,gyro,mag
 #define MSP_LED_STRIP_MODECOLOR  127    //out message         Get LED strip mode_color settings
 #define MSP_BATTERY_STATE        130    // DJI googles fc battery info
+#define MSP_ATTITUDE_QUATERNION  131    //out message         4 floats
 
 #define MSP_SET_RAW_RC           200    //in message          8 rc chan
 #define MSP_SET_RAW_GPS          201    //in message          fix, numsat, lat, lon, alt, speed

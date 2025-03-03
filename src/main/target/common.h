@@ -22,27 +22,29 @@
 #endif
 
 #ifdef USE_ITCM_RAM
-#define FAST_CODE                   __attribute__((section(".tcm_code")))
-#define NOINLINE                    __attribute__((noinline))
+#define FAST_CODE __attribute__((section(".tcm_code")))
+#define NOINLINE __attribute__((noinline))
 #else
 #define FAST_CODE
 #define NOINLINE
 #endif
 
-#define DYNAMIC_HEAP_SIZE   2048
+#define DYNAMIC_HEAP_SIZE 2048
 
 #define I2C1_OVERCLOCK false
 #define I2C2_OVERCLOCK false
-#define USE_I2C_PULLUP          // Enable built-in pullups on all boards in case external ones are too week
+#define USE_I2C_PULLUP  // Enable built-in pullups on all boards in case
+                        // external ones are too week
 
 #define USE_SERIAL_RX
-#define USE_SERIALRX_SPEKTRUM   // Cheap and fairly common protocol
-#define USE_SERIALRX_SBUS       // Very common protocol
-#define USE_SERIALRX_IBUS       // Cheap FlySky & Turnigy receivers
+#define USE_SERIALRX_SPEKTRUM  // Cheap and fairly common protocol
+#define USE_SERIALRX_SBUS      // Very common protocol
+#define USE_SERIALRX_IBUS      // Cheap FlySky & Turnigy receivers
 #define USE_SERIALRX_FPORT
 #define USE_SERIALRX_FPORT2
 
-//#define USE_DEV_TOOLS           // tools for dev use only. Undefine for release builds.
+// #define USE_DEV_TOOLS           // tools for dev use only. Undefine for
+// release builds.
 
 #define COMMON_DEFAULT_FEATURES (FEATURE_TX_PROF_SEL)
 
@@ -59,7 +61,7 @@
 #define USE_GPS_FIX_ESTIMATION
 
 // This is the shortest period in microseconds that the scheduler will allow
-#define SCHEDULER_DELAY_LIMIT           10
+#define SCHEDULER_DELAY_LIMIT 10
 
 #if defined(MAG_I2C_BUS) || defined(VCM5883_I2C_BUS)
 #define USE_MAG_VCM5883
@@ -126,12 +128,13 @@
 #define USE_TELEMETRY_MAVLINK
 #define USE_MSP_OVER_TELEMETRY
 
-#define USE_SERIALRX_SRXL2     // Spektrum SRXL2 protocol
+#define USE_SERIALRX_SRXL2  // Spektrum SRXL2 protocol
 #define USE_SERIALRX_JETIEXBUS
 #define USE_SERIALRX_MAVLINK
 #define USE_TELEMETRY_SRXL
 #define USE_SPEKTRUM_CMS_TELEMETRY
-//#define USE_SPEKTRUM_VTX_CONTROL //Some functions from betaflight still not implemented
+// #define USE_SPEKTRUM_VTX_CONTROL //Some functions from betaflight still not
+// implemented
 #define USE_SPEKTRUM_VTX_TELEMETRY
 
 #define USE_VTX_COMMON
@@ -155,15 +158,15 @@
 #define USE_TELEMETRY_JETIEXBUS
 // These are rather exotic serial protocols
 #define USE_RX_MSP
-//#define USE_MSP_RC_OVERRIDE
+#define USE_MSP_RC_OVERRIDE
 #define USE_SERIALRX_CRSF
 #define USE_SERIAL_PASSTHROUGH
-#define NAV_MAX_WAYPOINTS       120
+#define NAV_MAX_WAYPOINTS 120
 #define USE_RCDEVICE
 #define USE_MULTI_MISSION
 #define USE_MULTI_FUNCTIONS  // defines functions only, warnings always defined
 
-//Enable VTX control
+// Enable VTX control
 #define USE_VTX_CONTROL
 #define USE_VTX_SMARTAUDIO
 #define USE_VTX_TRAMP
@@ -172,7 +175,7 @@
 #define USE_PROGRAMMING_FRAMEWORK
 #define USE_CLI_BATCH
 
-//Enable DST calculations
+// Enable DST calculations
 #define RTC_AUTOMATIC_DST
 // Wind estimator
 #define USE_WIND_ESTIMATOR
@@ -183,11 +186,11 @@
 
 #define USE_CMS_FONT_PREVIEW
 
-//ADSB RECEIVER
+// ADSB RECEIVER
 #ifdef USE_GPS
 #define USE_ADSB
-#define MAX_ADSB_VEHICLES               5
-#define ADSB_LIMIT_CM                   6400000
+#define MAX_ADSB_VEHICLES 5
+#define ADSB_LIMIT_CM 6400000
 #endif
 
 #define USE_SERIAL_GIMBAL
@@ -200,7 +203,7 @@
 #define USE_TELEMETRY_SBUS2
 #endif
 
-//Designed to free space of F722 and F411 MCUs
+// Designed to free space of F722 and F411 MCUs
 #if (MCU_FLASH_SIZE > 512)
 #define USE_VTX_FFPV
 #define USE_SERIALRX_SUMD
@@ -219,11 +222,10 @@
 #endif
 
 #if (MCU_FLASH_SIZE <= 512)
-    #define SKIP_CLI_COMMAND_HELP
-    #undef USE_SERIALRX_SPEKTRUM
-    #undef USE_TELEMETRY_SRXL
+#define SKIP_CLI_COMMAND_HELP
+#undef USE_SERIALRX_SPEKTRUM
+#undef USE_TELEMETRY_SRXL
 #endif
 
 #define USE_EZ_TUNE
 #define USE_ADAPTIVE_FILTER
-
