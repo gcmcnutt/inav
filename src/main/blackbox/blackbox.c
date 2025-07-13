@@ -34,6 +34,7 @@
 #include "common/axis.h"
 #include "common/encoding.h"
 #include "common/maths.h"
+#include "common/quaternion.h"
 #include "common/time.h"
 #include "common/utils.h"
 
@@ -315,6 +316,10 @@ static const blackboxDeltaFieldDefinition_t blackboxMainFields[] = {
     {"attitude",    0, SIGNED,   .Ipredict = PREDICT(0),       .Iencode = ENCODING(SIGNED_VB),   .Ppredict = PREDICT(AVERAGE_2),     .Pencode = ENCODING(SIGNED_VB), FLIGHT_LOG_FIELD_CONDITION_ATTITUDE},
     {"attitude",    1, SIGNED,   .Ipredict = PREDICT(0),       .Iencode = ENCODING(SIGNED_VB),   .Ppredict = PREDICT(AVERAGE_2),     .Pencode = ENCODING(SIGNED_VB), FLIGHT_LOG_FIELD_CONDITION_ATTITUDE},
     {"attitude",    2, SIGNED,   .Ipredict = PREDICT(0),       .Iencode = ENCODING(SIGNED_VB),   .Ppredict = PREDICT(AVERAGE_2),     .Pencode = ENCODING(SIGNED_VB), FLIGHT_LOG_FIELD_CONDITION_ATTITUDE},
+    {"quaternion",  0, SIGNED,   .Ipredict = PREDICT(0),       .Iencode = ENCODING(SIGNED_VB),   .Ppredict = PREDICT(AVERAGE_2),     .Pencode = ENCODING(SIGNED_VB), FLIGHT_LOG_FIELD_CONDITION_QUATERNION},
+    {"quaternion",  1, SIGNED,   .Ipredict = PREDICT(0),       .Iencode = ENCODING(SIGNED_VB),   .Ppredict = PREDICT(AVERAGE_2),     .Pencode = ENCODING(SIGNED_VB), FLIGHT_LOG_FIELD_CONDITION_QUATERNION},
+    {"quaternion",  2, SIGNED,   .Ipredict = PREDICT(0),       .Iencode = ENCODING(SIGNED_VB),   .Ppredict = PREDICT(AVERAGE_2),     .Pencode = ENCODING(SIGNED_VB), FLIGHT_LOG_FIELD_CONDITION_QUATERNION},
+    {"quaternion",  3, SIGNED,   .Ipredict = PREDICT(0),       .Iencode = ENCODING(SIGNED_VB),   .Ppredict = PREDICT(AVERAGE_2),     .Pencode = ENCODING(SIGNED_VB), FLIGHT_LOG_FIELD_CONDITION_QUATERNION},
     {"debug",       0, SIGNED,   .Ipredict = PREDICT(0),       .Iencode = ENCODING(SIGNED_VB),   .Ppredict = PREDICT(AVERAGE_2),     .Pencode = ENCODING(SIGNED_VB), FLIGHT_LOG_FIELD_CONDITION_DEBUG},
     {"debug",       1, SIGNED,   .Ipredict = PREDICT(0),       .Iencode = ENCODING(SIGNED_VB),   .Ppredict = PREDICT(AVERAGE_2),     .Pencode = ENCODING(SIGNED_VB), FLIGHT_LOG_FIELD_CONDITION_DEBUG},
     {"debug",       2, SIGNED,   .Ipredict = PREDICT(0),       .Iencode = ENCODING(SIGNED_VB),   .Ppredict = PREDICT(AVERAGE_2),     .Pencode = ENCODING(SIGNED_VB), FLIGHT_LOG_FIELD_CONDITION_DEBUG},
@@ -520,6 +525,7 @@ typedef struct blackboxMainState_s {
     int16_t accADC[XYZ_AXIS_COUNT];
     int16_t accVib;
     int16_t attitude[XYZ_AXIS_COUNT];
+    int16_t quaternion[4];
     int32_t debug[DEBUG32_VALUE_COUNT];
     int16_t motor[MAX_SUPPORTED_MOTORS];
     int16_t servo[MAX_SUPPORTED_SERVOS];
@@ -593,6 +599,9 @@ typedef struct blackboxSlowState_s {
 
 //From rc_controls.c
 extern boxBitmask_t rcModeActivationMask;
+
+//From imu.c
+extern fpQuaternion_t orientation;
 
 static BlackboxState blackboxState = BLACKBOX_STATE_DISABLED;
 
@@ -802,6 +811,9 @@ static bool testBlackboxConditionUncached(FlightLogFieldCondition condition)
     case FLIGHT_LOG_FIELD_CONDITION_GYRO_PEAKS_YAW:
         return blackboxIncludeFlag(BLACKBOX_FEATURE_GYRO_PEAKS_YAW);
 
+    case FLIGHT_LOG_FIELD_CONDITION_QUATERNION:
+        return blackboxIncludeFlag(BLACKBOX_FEATURE_QUATERNION);
+
     case FLIGHT_LOG_FIELD_CONDITION_NEVER:
         return false;
 
@@ -995,6 +1007,10 @@ static void writeIntraframe(void)
 
     if (testBlackboxCondition(FLIGHT_LOG_FIELD_CONDITION_ATTITUDE)) {
         blackboxWriteSigned16VBArray(blackboxCurrent->attitude, XYZ_AXIS_COUNT);
+    }
+
+    if (testBlackboxCondition(FLIGHT_LOG_FIELD_CONDITION_QUATERNION)) {
+        blackboxWriteSigned16VBArray(blackboxCurrent->quaternion, 4);
     }
 
     if (testBlackboxCondition(FLIGHT_LOG_FIELD_CONDITION_DEBUG)) {
@@ -1713,6 +1729,11 @@ static void loadMainState(timeUs_t currentTimeUs)
     blackboxCurrent->attitude[0] = attitude.values.roll;
     blackboxCurrent->attitude[1] = attitude.values.pitch;
     blackboxCurrent->attitude[2] = attitude.values.yaw;
+
+    blackboxCurrent->quaternion[0] = lrintf(orientation.q0 * 10000);
+    blackboxCurrent->quaternion[1] = lrintf(orientation.q1 * 10000);
+    blackboxCurrent->quaternion[2] = lrintf(orientation.q2 * 10000);
+    blackboxCurrent->quaternion[3] = lrintf(orientation.q3 * 10000);
 
     for (int i = 0; i < DEBUG32_VALUE_COUNT; i++) {
         blackboxCurrent->debug[i] = debug[i];
