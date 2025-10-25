@@ -669,9 +669,27 @@ static bool mspFcProcessOutCommand(uint16_t cmdMSP, sbuf_t *dst,
             sbufWriteU16(dst, DECIDEGREES_TO_DEGREES(attitude.values.yaw));
             break;
 
-        case MSP_ATTITUDE_QUATERNION:
+        case MSP2_INAV_LOCAL_STATE: {
+            const navEstimatedPosVel_t *nav = navGetCurrentActualPositionAndVelocity();
+
+            const int32_t posX = lrintf(nav->pos.x);
+            const int32_t posY = lrintf(nav->pos.y);
+            const int32_t posZ = lrintf(nav->pos.z);
+
+            const int32_t velX = lrintf(nav->vel.x);
+            const int32_t velY = lrintf(nav->vel.y);
+            const int32_t velZ = lrintf(nav->vel.z);
+
+            sbufWriteU32(dst, (uint32_t)posX);
+            sbufWriteU32(dst, (uint32_t)posY);
+            sbufWriteU32(dst, (uint32_t)posZ);
+
+            sbufWriteU32(dst, (uint32_t)velX);
+            sbufWriteU32(dst, (uint32_t)velY);
+            sbufWriteU32(dst, (uint32_t)velZ);
+
             sbufWriteData(dst, (void *)(&orientation), sizeof(orientation));
-            break;
+        } break;
 
         case MSP_ALTITUDE:
             sbufWriteU32(dst, lrintf(getEstimatedActualPosition(Z)));
