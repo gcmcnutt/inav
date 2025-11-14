@@ -680,6 +680,7 @@ static bool mspFcProcessOutCommand(uint16_t cmdMSP, sbuf_t *dst,
             const int32_t velY = lrintf(nav->vel.y);
             const int32_t velZ = lrintf(nav->vel.z);
 
+            sbufWriteU32(dst, micros());  // timestamp_us for correlation with blackbox
             sbufWriteU32(dst, (uint32_t)posX);
             sbufWriteU32(dst, (uint32_t)posY);
             sbufWriteU32(dst, (uint32_t)posZ);
