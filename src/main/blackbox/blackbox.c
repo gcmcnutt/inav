@@ -1763,8 +1763,9 @@ static void loadMainState(timeUs_t currentTimeUs)
     blackboxCurrent->rssi = getRSSI();
 
     const int servoCount = getServoCount();
+    const int servoBase = getMinServoIndex();
     for (int i = 0; i < servoCount; i++) {
-        blackboxCurrent->servo[i] = servo[i];
+        blackboxCurrent->servo[i] = servo[servoBase + i];
     }
 
     blackboxCurrent->navState = navCurrentState;

@@ -205,6 +205,11 @@ int getServoCount(void)
     }
 }
 
+int getMinServoIndex(void)
+{
+    return minServoIndex;
+}
+
 void loadCustomServoMixer(void)
 {
     servoRuleCount = 0;
