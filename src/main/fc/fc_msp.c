@@ -670,6 +670,7 @@ static bool mspFcProcessOutCommand(uint16_t cmdMSP, sbuf_t *dst,
             break;
 
         case MSP2_INAV_LOCAL_STATE: {
+            // MSP2_AUTOC_STATE: consolidated nav + status + rc for single-call latency
             const navEstimatedPosVel_t *nav = navGetCurrentActualPositionAndVelocity();
 
             const int32_t posX = lrintf(nav->pos.x);
@@ -680,6 +681,7 @@ static bool mspFcProcessOutCommand(uint16_t cmdMSP, sbuf_t *dst,
             const int32_t velY = lrintf(nav->vel.y);
             const int32_t velZ = lrintf(nav->vel.z);
 
+            // Original local_state fields
             sbufWriteU32(dst, micros());  // timestamp_us for correlation with blackbox
             sbufWriteU32(dst, (uint32_t)posX);
             sbufWriteU32(dst, (uint32_t)posY);
@@ -690,6 +692,15 @@ static bool mspFcProcessOutCommand(uint16_t cmdMSP, sbuf_t *dst,
             sbufWriteU32(dst, (uint32_t)velZ);
 
             sbufWriteData(dst, (void *)(&orientation), sizeof(orientation));
+
+            // Extended: flight mode flags (replaces MSP_STATUS poll)
+            boxBitmask_t mspBoxModeFlags;
+            packBoxModeFlags(&mspBoxModeFlags);
+            sbufWriteData(dst, &mspBoxModeFlags, 4);  // first 32 bits of box modes
+
+            // Extended: RC channels 8 and 9 (arm switch + path selector)
+            sbufWriteU16(dst, rxGetChannelValue(8));
+            sbufWriteU16(dst, rxGetChannelValue(9));
         } break;
 
         case MSP_ALTITUDE:
