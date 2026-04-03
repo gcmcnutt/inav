@@ -701,6 +701,14 @@ static bool mspFcProcessOutCommand(uint16_t cmdMSP, sbuf_t *dst,
             // Extended: RC channels 8 and 9 (arm switch + path selector)
             sbufWriteU16(dst, rxGetChannelValue(8));
             sbufWriteU16(dst, rxGetChannelValue(9));
+
+            // Extended (021): filtered gyro rates in deci-deg/s (int16)
+            // gyro.gyroADCf is post-LPF in deg/s. Scale ×10 for 0.1°/s resolution.
+            // INAV convention: positive pitch = nose DOWN, positive yaw = nose LEFT.
+            // Consumer (xiao) must negate pitch/yaw — see COORDINATE_CONVENTIONS.md.
+            sbufWriteU16(dst, (uint16_t)(int16_t)lrintf(gyro.gyroADCf[0] * 10.0f));  // roll
+            sbufWriteU16(dst, (uint16_t)(int16_t)lrintf(gyro.gyroADCf[1] * 10.0f));  // pitch
+            sbufWriteU16(dst, (uint16_t)(int16_t)lrintf(gyro.gyroADCf[2] * 10.0f));  // yaw
         } break;
 
         case MSP_ALTITUDE:
