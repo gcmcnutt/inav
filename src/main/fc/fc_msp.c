@@ -709,6 +709,19 @@ static bool mspFcProcessOutCommand(uint16_t cmdMSP, sbuf_t *dst,
             sbufWriteU16(dst, (uint16_t)(int16_t)lrintf(gyro.gyroADCf[0] * 10.0f));  // roll
             sbufWriteU16(dst, (uint16_t)(int16_t)lrintf(gyro.gyroADCf[1] * 10.0f));  // pitch
             sbufWriteU16(dst, (uint16_t)(int16_t)lrintf(gyro.gyroADCf[2] * 10.0f));  // yaw
+
+            // Extended (041): specific force from the accelerometer, milli-g (int16).
+            // acc.accADCf is post applySensorAlignment + applyBoardAlignment and already
+            // divided by acc.dev.acc_1G, i.e. in g (acceleration.c:563-568) — the same
+            // transformed-field choice as gyro.gyroADCf above. NOT accADC / acc.dev.ADCRaw,
+            // which are pre-alignment and would bake each board's misalignment in differently.
+            // Scale x1000 for 1 mg resolution: +/-32 g range vs +/-11 g observed.
+            // Frame is INAV-native FLU (x fwd, y LEFT, z UP), UNFLIPPED, exactly as the quat
+            // and gyro are. The FLU->FRD y/z flip belongs at the consumer (xiao msplink),
+            // once, beside the other two. See COORDINATE_CONVENTIONS.md.
+            sbufWriteU16(dst, (uint16_t)(int16_t)lrintf(acc.accADCf[0] * 1000.0f));  // x forward
+            sbufWriteU16(dst, (uint16_t)(int16_t)lrintf(acc.accADCf[1] * 1000.0f));  // y left
+            sbufWriteU16(dst, (uint16_t)(int16_t)lrintf(acc.accADCf[2] * 1000.0f));  // z up
         } break;
 
         case MSP_ALTITUDE:
