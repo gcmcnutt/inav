@@ -101,7 +101,31 @@ void mspOverrideInit(void)
     }
 
     rxDataFailurePeriod = PERIOD_RXDATA_FAILURE + failsafeConfig()->failsafe_delay * MILLIS_PER_TENTH_SECOND;
-    rxDataRecoveryPeriod = PERIOD_RXDATA_RECOVERY + failsafeConfig()->failsafe_recovery_delay * MILLIS_PER_TENTH_SECOND;
+    // 043 FR-042 (T051) — honour failsafe_recovery_delay = 0 as ACTUALLY ZERO.
+    //
+    // PERIOD_RXDATA_RECOVERY (200 ms, failsafe.h) was added unconditionally, so
+    // MSP override could never engage sooner than 200 ms after the xiao starts
+    // sending valid frames — even with the delay configured to 0. In the autoc
+    // loop that floor is pure engage latency on every engagement, and it is not
+    // debouncing anything useful: the override source is a wired, deterministic
+    // 20 Hz link, not a flaky RF receiver.
+    //
+    // ⛔ SCOPE: rxDataRecoveryPeriod is `static` in this file and read only by
+    // the MSP-override recovery check below, so the main RX / failsafe recovery
+    // timing is UNCHANGED.
+    //
+    // ⚠️ Verify on the bench before flight — T057 exists for precisely this.
+    //
+    // ⭐ DECOUPLED from failsafe_recovery_delay on purpose. That setting is
+    // SHARED with the main RC failsafe (failsafe.c:157), which is still
+    // `PERIOD_RXDATA_RECOVERY + delay` and untouched. Driving MSP engage
+    // latency by zeroing the shared setting would also cut the real RC link's
+    // recovery debounce from 700 ms to 200 ms — a failsafe change made as a
+    // side effect of an autoc latency tweak, which is exactly the kind of
+    // coupling worth refusing. The MSP override source is a wired,
+    // deterministic 20 Hz link that needs no RF debounce, so its recovery
+    // period is simply 0 and the config keeps protecting the RC path.
+    rxDataRecoveryPeriod = 0;
 
     rxMspInit(rxConfig(), &rxRuntimeConfigMSP);
 }
